@@ -1,13 +1,14 @@
 import os
 
-from Parsers.exe_parser import EXEParser
-from Infrastructure.errors import EXEParsingError, UnsupportedFormatError
-from Infrastructure.logs_writer import clear_logs
+from infrastructure.constants import OUTPUT_BIN_DIR
+from parsers.exe_parser import EXEParser
+from infrastructure.errors import EXEParsingError, UnsupportedFormatError
+from infrastructure.logs_writer import clear_logs
 
 def main():
     handle_output()
     while True:
-        exe_path = str(input("Введите файл для проверки: ")) #ExeFiles/calc.exe
+        exe_path = str(input("Введите файл для проверки: ")) #exe_files/notepad.exe
 
         try:
             parser = EXEParser(exe_path)
@@ -21,7 +22,7 @@ def handle_output():
     clear_logs()
     for i in range(1, 15):
         try:
-            os.remove(f"output_text_{i}.bin")
+            os.remove(OUTPUT_BIN_DIR(i))
         except:
             pass
 

@@ -1,18 +1,19 @@
-from Infrastructure.presentations import HeaderParser, Import, Section
-from Infrastructure.errors import EXEParsingError
+from infrastructure.header_parser import BaseHeaderParser, Import
+from infrastructure.errors import EXEParsingError
 import struct
-from Infrastructure.constants import (
+from infrastructure.constants import (
     MZ_HEADER_SIZE, WORD_SIZE, PE_SIGNATURE,
     E_LFANEW_OFFSET, MZ_SIGNATURE, DWORD_SIZE
 )
 from typing import BinaryIO, List
 from .pe_parser import PEHeaderParser
 
-class MZHeaderParser(HeaderParser):
+class MZHeaderParser(BaseHeaderParser):
     """Парсер для MZ (DOS) заголовков EXE файлов."""
 
     def parse(self):
         """Обертка парсинга MZ заголовка"""
+
         try:
             with open(self.file_path, 'rb') as f:
                 self.handle_exe_file(f)
@@ -23,6 +24,7 @@ class MZHeaderParser(HeaderParser):
 
     def handle_exe_file(self, f: BinaryIO) -> None:
         """Парсинг MZ заголовка"""
+
         mz_header = f.read(MZ_HEADER_SIZE)
         self.check_mz_header(mz_header)
 
@@ -34,6 +36,7 @@ class MZHeaderParser(HeaderParser):
 
     def move_to_pe_header(self, f, pe_offset) -> None:
         """Чтение PE заголовка и его обработка"""
+
         f.seek(pe_offset)
         pe_signature = f.read(len(PE_SIGNATURE))
         if pe_signature == PE_SIGNATURE:

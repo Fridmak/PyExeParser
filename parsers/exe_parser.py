@@ -1,9 +1,11 @@
 import os
 from typing import Optional, List
 from .mz_parser import MZHeaderParser
-from Infrastructure.errors import EXEParsingError, UnsupportedFormatError
-from Infrastructure.presentations import Section, Import, MachineCode
-from Infrastructure.constants import MZ_SIGNATURE, WORD_SIZE
+from infrastructure.errors import EXEParsingError, UnsupportedFormatError
+from infrastructure.machine_code  import MachineCode
+from infrastructure.section import Section
+from infrastructure.import_describition import Import
+from infrastructure.constants import MZ_SIGNATURE, WORD_SIZE, OUTPUT_BIN_DIR
 
 
 
@@ -18,6 +20,7 @@ class EXEParser:
 
     def parse(self):
         """Определяет формат EXE файла и парсит его."""
+
         try:
             with open(self.file_path, 'rb') as f:
                 mz_header = f.read(WORD_SIZE)
@@ -33,18 +36,21 @@ class EXEParser:
 
     def get_sections(self) -> List[Section]:
         """Возвращает список секций EXE файла."""
+
         if not self.header_parser:
             raise EXEParsingError("Файл не был распарсен.")
         return self.header_parser.sections
 
     def get_imports(self) -> List[Import]:
         """Возвращает таблицу импортов EXE файла."""
+
         if not self.header_parser:
             raise EXEParsingError("Файл не был распарсен.")
         return self.header_parser.get_imports()
 
     def get_machine_code(self) -> List[MachineCode]:
         """Извлекает машинный код из всех секций .text"""
+
         if not self.header_parser:
             raise EXEParsingError("Файл не был распарсен.")
 
@@ -67,6 +73,7 @@ class EXEParser:
 
     def display_info(self):
         """Выводит информацию о секциях, импортах и машинном коде"""
+
         sections = self.get_sections()
         imports = self.get_imports()
         
@@ -96,9 +103,13 @@ class EXEParser:
                 print("  ", " ".join(f"{b:02X}" for b in machine_code.code[:32]))
                 
                 # Сохраняем в отдельные файлы для каждой секции
-                with open(f"output_text_{i}.bin", 'wb') as f:
-                    f.write(machine_code.code)
-                print(f"  Машинный код сохранен в output_text_{i}.bin")
+                self.save_machine_code(i, machine_code)
                 
         except EXEParsingError as e:
             print("\nМашинный код: не удалось извлечь")
+
+    def save_machine_code(self, i, machine_code : MachineCode):
+
+        with open(OUTPUT_BIN_DIR(i), 'wb') as f:
+            f.write(bytes(machine_code.code))
+        print(f"  Машинный код сохранен в output_text_{i}.bin")

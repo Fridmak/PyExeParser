@@ -1,3 +1,12 @@
+from pathlib import Path
+
+#FILES
+ROOT_DIR = Path(__file__).parent.parent.absolute()
+LOGS_FILE = ROOT_DIR / 'log.txt'
+OUTPUT_DIR = ROOT_DIR / "output"
+OUTPUT_BIN_DIR = lambda i: OUTPUT_DIR / f'output_bin_{i}.bin'
+OUTPUT_ASSEMBLY_DIR = lambda i: OUTPUT_DIR / f'output_assembly_{i}.txt'
+
 MZ_HEADER_SIZE = 64
 PE_HEADER_SIZE = 24
 COFF_HEADER_SIZE = 20
@@ -65,6 +74,3 @@ MACHINE_CODE_PATTERNS = [
 # ASCII коды
 ASCII_PRINTABLE_MIN = 32
 ASCII_PRINTABLE_MAX = 126
-
-# Расширения файлов
-BIN_EXTENSION = '.bin'

@@ -1,9 +1,9 @@
 from typing import BinaryIO, List, Any
 import struct
-from Infrastructure.logs_writer import write_log
-from Infrastructure.presentations import HeaderParser, Section, Import
-from Infrastructure.errors import EXEParsingError
-from Infrastructure.constants import (
+from infrastructure.logs_writer import write_log
+from infrastructure.header_parser import BaseHeaderParser, Section, Import
+from infrastructure.errors import EXEParsingError
+from infrastructure.constants import (
     PE_HEADER_SIZE, PE_SIGNATURE, PE32_MAGIC, PE32_PLUS_MAGIC,
     SECTION_HEADER_SIZE, DATA_DIRECTORY_PE32_OFFSET,
     DATA_DIRECTORY_PE32PLUS_OFFSET, NUMBER_OF_RVA_SIZES_OFFSET
@@ -11,7 +11,7 @@ from Infrastructure.constants import (
 from .import_table import ImportTableParser
 
 
-class PEHeaderParser(HeaderParser):
+class PEHeaderParser(BaseHeaderParser):
     """Парсер для PE (Portable Executable) заголовков EXE файлов."""
 
     def __init__(self, file_path: str, pe_offset: int):
@@ -20,6 +20,8 @@ class PEHeaderParser(HeaderParser):
         self.is_pe32_plus = False  # По умолчанию PE32
 
     def parse(self):
+        """Called when PE parsing needed"""
+
         try:
             with open(self.file_path, 'rb') as f:
                 f.seek(0, 2)
@@ -46,28 +48,32 @@ class PEHeaderParser(HeaderParser):
             raise EXEParsingError(f"Ошибка при чтении PE заголовка: {str(e)}")
 
     def handle_import_dir(self, optional_header: bytes) -> tuple[Any, ...]:
+        """Gets import rva, import dir size"""
+
         data_directories_offset = (
-            DATA_DIRECTORY_PE32PLUS_OFFSET if self.is_pe32_plus 
+            DATA_DIRECTORY_PE32PLUS_OFFSET if self.is_pe32_plus
             else DATA_DIRECTORY_PE32_OFFSET
         )
 
         if len(optional_header) < data_directories_offset + 16:
             return (0, 0)
-        
+
         number_of_rva_and_sizes = struct.unpack(
-            "<I", 
+            "<I",
             optional_header[NUMBER_OF_RVA_SIZES_OFFSET:NUMBER_OF_RVA_SIZES_OFFSET + 4]
         )[0]
-        
+
         if number_of_rva_and_sizes < 2:
             return (0, 0)
-            
+
         return struct.unpack(
             "<II",
             optional_header[data_directories_offset + 8:data_directories_offset + 16]
         )
 
     def handle_magic(self, magic: int) -> None:
+        """Checks if format is pe32+"""
+
         if magic == PE32_MAGIC:
             self.is_pe32_plus = False
         elif magic == PE32_PLUS_MAGIC:
@@ -92,6 +98,8 @@ class PEHeaderParser(HeaderParser):
             raise EXEParsingError("Недостаточно данных для PE заголовка.")
 
     def read_sections(self, number_of_sections: int, f: BinaryIO) -> List[Section]:
+        """Reads anf parses all sections"""
+
         sections = []
 
         for section_num in range(number_of_sections):
@@ -118,6 +126,8 @@ class PEHeaderParser(HeaderParser):
         return sections
 
     def handle_imports(self, import_directory_rva: int, dir_size: int) -> None:
+        """Parses imports from pe file"""
+
         if import_directory_rva == 0:
             self.imports = []
             return
@@ -132,6 +142,8 @@ class PEHeaderParser(HeaderParser):
         self.imports = import_parser.parse()
 
     def read_sections_raw_rata(self, f: BinaryIO) -> None:
+        """Reads raw data from section"""
+
         for section in self.sections:
             if section.size_of_raw_data == 0:
                 section.raw_data = b''
