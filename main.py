@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 from infrastructure.constants import OUTPUT_BIN_DIR
 from parsers.exe_parser import EXEParser
@@ -8,7 +9,7 @@ from infrastructure.logs_writer import clear_logs
 def main():
     handle_output()
     while True:
-        exe_path = str(input("Введите файл для проверки: ")) #exe_files/notepad.exe
+        exe_path = Path(str(input("Введите файл для проверки: "))) #exe_files/notepad.exe
 
         try:
             parser = EXEParser(exe_path)

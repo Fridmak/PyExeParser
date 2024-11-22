@@ -1,5 +1,6 @@
 import os
-from typing import Optional, List
+from pathlib import Path
+
 from .mz_parser import MZHeaderParser
 from infrastructure.errors import EXEParsingError, UnsupportedFormatError
 from infrastructure.machine_code  import MachineCode
@@ -12,11 +13,11 @@ from infrastructure.constants import MZ_SIGNATURE, WORD_SIZE, OUTPUT_BIN_DIR
 class EXEParser:
     """Основной класс для парсинга EXE файлов (MZ, PE)."""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: Path):
         if not os.path.isfile(file_path):
             raise FileNotFoundError(f"Файл не найден: {file_path}")
         self.file_path = file_path
-        self.header_parser: Optional[MZHeaderParser] = None
+        self.header_parser: [MZHeaderParser | None] = None
 
     def parse(self):
         """Определяет формат EXE файла и парсит его."""
@@ -34,21 +35,21 @@ class EXEParser:
             self.header_parser = None
             raise
 
-    def get_sections(self) -> List[Section]:
+    def get_sections(self) -> list[Section]:
         """Возвращает список секций EXE файла."""
 
         if not self.header_parser:
             raise EXEParsingError("Файл не был распарсен.")
         return self.header_parser.sections
 
-    def get_imports(self) -> List[Import]:
+    def get_imports(self) -> list[Import]:
         """Возвращает таблицу импортов EXE файла."""
 
         if not self.header_parser:
             raise EXEParsingError("Файл не был распарсен.")
         return self.header_parser.get_imports()
 
-    def get_machine_code(self) -> List[MachineCode]:
+    def get_machine_code(self) -> list[MachineCode]:
         """Извлекает машинный код из всех секций .text"""
 
         if not self.header_parser:
@@ -77,8 +78,8 @@ class EXEParser:
         sections = self.get_sections()
         imports = self.get_imports()
         
-        splitter = '/' if self.file_path.count('/')>0 else '\\'
-        print(f"Resolved {self.file_path.split(splitter)[-1]}:")
+        splitter = '/' if str(self.file_path).count('/')>0 else '\\'
+        print(f"Resolved {str(self.file_path).split(splitter)[-1]}:")
         print()
         print("Секции:")
         for section in sections:

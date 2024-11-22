@@ -1,23 +1,44 @@
+import pytest
 from parsers.exe_parser import EXEParser
 from infrastructure.constants import ROOT_DIR
-import unittest
 
-class TestParsing(unittest.TestCase):
-    """Tests parsers using unittest"""
 
-    def test_calc(self):
-        parser = EXEParser(str(ROOT_DIR / 'exe_files' / 'calc.exe'))
+class TestParsing:
+    """Tests parsers using pytest"""
+
+    @pytest.fixture
+    def calc_parser(self):
+        parser = EXEParser(ROOT_DIR / 'exe_files' / 'calc.exe')
         parser.parse()
-        self.assertIs(len(parser.header_parser.sections), 6, "Wrong number of sections")
-        self.assertIs(len(parser.header_parser.imports), 7, "Wrong number of imports")
+        return parser
 
-    def test_notepad(self):
-        parser = EXEParser(str(ROOT_DIR / 'exe_files' / 'notepad.exe'))
+    @pytest.fixture
+    def notepad_parser(self):
+        parser = EXEParser(ROOT_DIR / 'exe_files' / 'notepad.exe')
         parser.parse()
-        self.assertIs(len(parser.header_parser.sections), 7, "Wrong number of sections")
-        self.assertIs(len(parser.header_parser.imports), 28, "Wrong number of imports")
+        return parser
 
+    def test_calc_sections(self, calc_parser):
+        assert len(calc_parser.header_parser.sections) == 6, "Wrong number of sections"
 
-tester = TestParsing()
-tester.test_calc()
-tester.test_notepad()
+    def test_calc_imports(self, calc_parser):
+        assert len(calc_parser.header_parser.imports) == 7, "Wrong number of imports"
+
+    def test_notepad_sections(self, notepad_parser):
+        assert len(notepad_parser.header_parser.sections) == 7, "Wrong number of sections"
+
+    def test_notepad_imports(self, notepad_parser):
+        assert len(notepad_parser.header_parser.imports) == 28, "Wrong number of imports"
+
+    @pytest.mark.parametrize("exe_file,expected_sections,expected_imports", [
+        ('calc.exe', 6, 7),
+        ('notepad.exe', 7, 28),
+    ])
+    def test_exe_parsing(self, exe_file, expected_sections, expected_imports):
+        parser = EXEParser(ROOT_DIR / 'exe_files' / exe_file)
+        parser.parse()
+
+        assert len(parser.header_parser.sections) == expected_sections, \
+            f"Wrong number of sections for {exe_file}"
+        assert len(parser.header_parser.imports) == expected_imports, \
+            f"Wrong number of imports for {exe_file}"

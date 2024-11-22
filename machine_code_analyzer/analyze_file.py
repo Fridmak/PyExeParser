@@ -1,5 +1,4 @@
 import os
-from typing import List
 
 from infrastructure.machine_code import MachineCode
 from infrastructure.constants import (
@@ -102,7 +101,7 @@ class BinFileToAssembly():
         """Gets assembly code"""
 
         md = Cs(CS_ARCH_X86, CS_MODE_64)
-        codes : List[bytes] = []
+        codes : list[bytes] = []
         with open(self.file_path, 'rb') as f:
             codes.append(f.read())
 

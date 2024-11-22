@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import BinaryIO, List, Any
 import struct
 from infrastructure.logs_writer import write_log
@@ -14,7 +15,7 @@ from .import_table import ImportTableParser
 class PEHeaderParser(BaseHeaderParser):
     """Парсер для PE (Portable Executable) заголовков EXE файлов."""
 
-    def __init__(self, file_path: str, pe_offset: int):
+    def __init__(self, file_path: Path, pe_offset: int):
         super().__init__(file_path)
         self.pe_offset = pe_offset
         self.is_pe32_plus = False  # По умолчанию PE32

@@ -1,5 +1,4 @@
 import struct
-from typing import Optional, List
 from infrastructure.import_describition import Import, ImportDescriptor
 from infrastructure.section import Section
 from infrastructure.errors import EXEParsingError
@@ -12,13 +11,13 @@ from infrastructure.constants import (
 class ImportTableParser:
     """Парсер таблицы импортов в PE файлах"""
 
-    def __init__(self, file_path: str, sections: List[Section], import_rva: int, import_size: int, is_pe32_plus: bool):
+    def __init__(self, file_path: str, sections: list[Section], import_rva: int, import_size: int, is_pe32_plus: bool):
         self.file_path = file_path
         self.sections = sections
         self.import_rva = import_rva
         self.import_size = import_size
         self.is_pe32_plus = is_pe32_plus
-        self.imports: List[Import] = []
+        self.imports: list[Import] = []
 
     def rva_to_offset(self, rva: int) -> int:
         """Преобразует RVA в файловое смещение"""
@@ -29,7 +28,7 @@ class ImportTableParser:
                 return section.pointer_to_raw_data + (rva - section.virtual_address)
         raise EXEParsingError(f"Не удалось преобразовать RVA 0x{rva:X} в файловое смещение.")
 
-    def parse(self) -> List[Import]:
+    def parse(self) -> list[Import]:
         """Parses file and gets Imports"""
 
         with open(self.file_path, 'rb') as f:
@@ -85,7 +84,7 @@ class ImportTableParser:
             result.append(char)
         return b''.join(result).decode('utf-8', errors='replace')
 
-    def _parse_thunks(self, f, descriptor: ImportDescriptor) -> List[str]:
+    def _parse_thunks(self, f, descriptor: ImportDescriptor) -> list[str]:
         """Gets all functions"""
 
         functions = []
@@ -98,7 +97,7 @@ class ImportTableParser:
             thunk_rva += 8 if self.is_pe32_plus else 4
         return functions
 
-    def _read_thunk(self, f, thunk_rva: int) -> Optional[str]:
+    def _read_thunk(self, f, thunk_rva: int) -> [str | None]:
         """Reads func's name"""
 
         try:

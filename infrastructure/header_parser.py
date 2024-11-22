@@ -1,4 +1,4 @@
-from typing import List
+from pathlib import Path
 from abc import ABC, abstractmethod
 from infrastructure.section import Section
 from infrastructure.import_describition import Import
@@ -7,10 +7,10 @@ from infrastructure.import_describition import Import
 class BaseHeaderParser(ABC):
     """Абстрактный базовый класс для парсеров заголовков EXE файлов"""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: Path):
         self.file_path = file_path
-        self.sections: List[Section] = []
-        self.imports: List[Import] = []
+        self.sections: list[Section] = []
+        self.imports: list[Import] = []
 
     @abstractmethod
     def parse(self):
@@ -18,6 +18,6 @@ class BaseHeaderParser(ABC):
         pass
 
     @abstractmethod
-    def get_imports(self) -> List[Import]:
+    def get_imports(self) -> list[Import]:
         """Возвращает таблицу импортов"""
         pass

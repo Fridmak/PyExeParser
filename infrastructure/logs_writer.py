@@ -1,4 +1,5 @@
 from infrastructure.constants import LOGS_FILE
+
 def write_log(text):
     with open(LOGS_FILE, 'a') as f:
         f.write(text + '\n')
